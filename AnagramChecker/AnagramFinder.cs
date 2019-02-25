@@ -1,16 +1,19 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace AnagramCheck
 {
     public class AnagramFinder
     {
-        public List<List<string>> FindAnagrams(List<string> words)
+        public AnagramFinderResult FindAnagrams(List<string> words)
         {
-            var result = new List<List<string>>();
+            var result = new AnagramFinderResult();
 
             var anagramsNumber = new HashSet<ushort>();
-
             var anagramChecker = new AnagramChecker();
+
+            var longestWordWithAnagramLength = 0;
+            var longestAnagramListLength = 0;
 
             for (var i = 0; i < words.Count - 1; i++)
             {
@@ -44,11 +47,65 @@ namespace AnagramCheck
 
                 if (currentWordAnagrams != null)
                 {
-                    result.Add(currentWordAnagrams);
+                    if (longestAnagramListLength < currentWordAnagrams.Count)
+                    {
+                        longestAnagramListLength = currentWordAnagrams.Count;
+
+                        result.LongestListIndex = (ushort)result.Anagrams.Count;
+                    }
+
+                    if (longestWordWithAnagramLength < currentWord.Length)
+                    {
+                        longestWordWithAnagramLength = currentWord.Length;
+
+                        result.LongestWordIndex = (ushort)result.Anagrams.Count;
+                    }
+
+                    result.Anagrams.Add(currentWordAnagrams);
                 }
             }
 
             return result;
+        }
+    }
+
+    public class AnagramFinderResult
+    {
+        public AnagramFinderResult()
+        {
+            Anagrams = new List<List<string>>();
+        }
+
+        public List<List<string>> Anagrams { get; set; }
+
+        /// <summary>
+        /// Index in <see cref="AnagramFinderResult.Anagrams"/>
+        /// </summary>
+        public ushort LongestWordIndex { private get; set; }
+
+        /// <summary>
+        /// Index in <see cref="AnagramFinderResult.Anagrams"/>
+        /// </summary>
+        public ushort LongestListIndex { private get; set; }
+
+        public string GetLongestWordWithAnagram()
+        {
+            if (!Anagrams.Any() || LongestWordIndex >= Anagrams.Count)
+            {
+                return string.Empty;
+            }
+
+            return Anagrams[LongestWordIndex].First();
+        }
+
+        public List<string> GetLongestAnagramList()
+        {
+            if (!Anagrams.Any() || LongestListIndex >= Anagrams.Count)
+            {
+                return new List<string>();
+            }
+
+            return Anagrams[LongestListIndex];
         }
     }
 }
